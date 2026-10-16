@@ -1,0 +1,1481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pigeon Post</title>
+<meta name="description" content="Write a journal entry, pick a template, and send it to yourself as a styled email.">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem('pigeon-post:theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+/* Layout: minimal cozy modern, with scrapbook / Polaroid accents.
+   Add-ons (template, photos, stamp, sign-off icon) sit in drawers so the writing page stays quiet.
+   The letter preview is a white card; each template styles the email inside it.
+   The one tactile moment is the kraft-paper post panel with a pressable wax seal. */
+:root {
+  --ground: #F4F2EE;
+  --paper: #FAF8F5;
+  --paper-line: #EFECE6;
+  --ink: #2C2A29;
+  --ink-soft: #787470;
+  --rule: #E2DDD5;
+  --accent: #3A5A40;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #E8EDE9;
+  --warn: #9C5838;
+  --warn-soft: #F7EFEA;
+  --polaroid-bg: #FFFFFF;
+  --shadow: rgba(44, 42, 41, 0.08);
+  --shadow-float: rgba(44, 42, 41, 0.16);
+  --kraft: #E9DFCA;
+  --kraft-edge: #CFBF9E;
+  --wax1: #5F8A68;
+  --wax2: #3A5A40;
+  --wax3: #2A4230;
+  --wax-edge: #1F3324;
+  --seal-ink: #FFFFFF;
+  --font-display: 'Newsreader', Georgia, serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #161513; --paper: #201E1C; --paper-line: #2A2825; --ink: #EDEAE4; --ink-soft: #9E9993;
+    --rule: #363330; --accent: #6E9C6D; --accent-ink: #0F1A10; --accent-soft: #233124;
+    --warn: #D98864; --warn-soft: #33231C; --polaroid-bg: #272522; --shadow: rgba(0, 0, 0, 0.3); --shadow-float: rgba(0, 0, 0, 0.5);
+    --kraft: #2D2924; --kraft-edge: #4A4236;
+    --wax1: #7FAE88; --wax2: #588157; --wax3: #3F6140; --wax-edge: #263A28; --seal-ink: #F4F8F4;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #161513; --paper: #201E1C; --paper-line: #2A2825; --ink: #EDEAE4; --ink-soft: #9E9993;
+  --rule: #363330; --accent: #6E9C6D; --accent-ink: #0F1A10; --accent-soft: #233124;
+  --warn: #D98864; --warn-soft: #33231C; --polaroid-bg: #272522; --shadow: rgba(0, 0, 0, 0.3); --shadow-float: rgba(0, 0, 0, 0.5);
+  --kraft: #2D2924; --kraft-edge: #4A4236;
+  --wax1: #7FAE88; --wax2: #588157; --wax3: #3F6140; --wax-edge: #263A28; --seal-ink: #F4F8F4;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 56px;
+}
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+
+.shell { max-width: 1120px; margin: 0 auto; }
+.lbl { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+.mono { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-soft); }
+
+/* Header */
+.top { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; flex-wrap: wrap; }
+.logo-slot {
+flex: none; width: 76px; height: 76px; display: grid; place-items: center; overflow: hidden;
+border: 1.5px dashed var(--ink-soft); border-radius: 16px; color: var(--ink-soft);
+  font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.logo-slot img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.logo-slot.has-img { border: 0; }
+.top h1 { font-family: var(--font-display); font-weight: 500; font-size: 2.2rem; line-height: 1.1; margin: 0; letter-spacing: -0.01em; }
+.top p { margin: 2px 0 0; }
+
+/* Layout */
+.grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: start; }
+.grid > * { min-width: 0; }
+@media (min-width: 860px) {
+  .grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 36px; }
+  .post { position: sticky; top: calc(16px + env(safe-area-inset-top, 0px)); }
+}
+
+.theme-btn {
+  margin-left: auto; background: transparent; border: 1px solid var(--rule); border-radius: 999px;
+  padding: 6px 14px; font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--ink-soft);
+}
+.theme-btn:hover { background: var(--paper-line); }
+
+/* Notebook */
+.notebook {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 4px 20px var(--shadow);
+}
+.title-input {
+  width: 100%; border: 0; border-bottom: 1px solid var(--rule); background: transparent;
+  font-family: var(--font-display); font-size: 1.45rem; line-height: 1.3; padding: 4px 0 8px; border-radius: 0;
+}
+.title-input::placeholder, .page::placeholder, .small::placeholder, .box-input::placeholder, .tag-add::placeholder { color: var(--ink-soft); opacity: 0.6; }
+.meta-row { display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: flex-end; }
+.meta-row > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.meta-row .grow { flex: 1 1 200px; }
+.box-input, .date-input, select.box-input {
+  width: 100%; border: 1px solid var(--rule); border-radius: 8px; background: transparent; padding: 8px 12px; font-size: 0.95rem;
+}
+.date-input { width: auto; font-family: var(--font-mono); font-size: 0.85rem; padding: 7px 10px; }
+.tagfield { display: flex; flex-direction: column; gap: 6px; }
+.tags-box { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; border: 1px solid var(--rule); border-radius: 8px; padding: 6px 10px; min-height: 44px; }
+.taglist { display: contents; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; background: var(--accent-soft); color: var(--accent);
+  padding: 3px 8px 3px 10px; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 500;
+}
+.chip svg { width: 9px; height: 9px; }
+.tag-add { flex: 1 1 9rem; min-width: 0; border: 0; background: transparent; font-family: var(--font-mono); font-size: 0.85rem; padding: 4px 2px; }
+.tag-add:focus-visible { outline: none; }
+.tags-box:focus-within { border-color: var(--accent); }
+
+.page {
+  width: 100%; min-height: 20rem; border: 0; background-color: transparent; resize: none; padding: 4px 2px; display: block;
+  font-family: var(--font-body); font-size: 1.02rem; line-height: 1.8; overflow: hidden;
+}
+.page-foot { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: baseline; border-top: 1px dashed var(--rule); padding-top: 12px; }
+.linkbtn { background: none; border: 0; padding: 0; font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+/* Drawers for add-ons */
+.drawer-toggle {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  background: transparent; border: 1px solid var(--rule); border-radius: 8px; padding: 10px 14px;
+  font-family: var(--font-mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-soft);
+  cursor: pointer;
+}
+.drawer-toggle:hover { background: var(--paper-line); border-color: var(--ink-soft); }
+.drawer-content { display: flex; flex-direction: column; gap: 16px; padding-top: 4px; }
+
+.notebook h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; margin: 0 0 8px; color: var(--ink); }
+.tpls { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.tpl { display: block; position: relative; }
+.tpl input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.tpl-body { display: block; height: 100%; border: 1px solid var(--rule); border-radius: 8px; padding: 10px; background: var(--paper); }
+.tpl-body .sw { display: flex; height: 12px; border-radius: 2px; overflow: hidden; border: 1px solid var(--rule); margin-bottom: 6px; }
+.tpl-body .sw i { flex: 1; display: block; }
+.tpl-body b { display: block; font-family: var(--font-display); font-weight: 500; font-size: 0.92rem; }
+.tpl-body .d { display: block; font-size: 0.75rem; line-height: 1.3; color: var(--ink-soft); margin-top: 2px; }
+.tpl input:checked + .tpl-body { border-color: var(--accent); background: var(--accent-soft); }
+.tpl input:focus-visible + .tpl-body { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.prompts { display: flex; flex-direction: column; gap: 12px; }
+.pfield { display: flex; flex-direction: column; gap: 4px; }
+.pfield .check { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; cursor: pointer; }
+.pfield .check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.small {
+  width: 100%; min-height: 4rem; resize: none; overflow: hidden; background: transparent; border: 1px solid var(--rule);
+  border-radius: 8px; padding: 8px 10px; font-family: var(--font-body); font-size: 0.95rem; line-height: 1.5;
+}
+
+/* Photos, stamp maker, sign-off icons */
+.hint, .status, .warn { margin: 0; font-size: 0.85rem; color: var(--ink-soft); line-height: 1.5; }
+.photo-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.filebtn { position: relative; display: inline-block; cursor: pointer; }
+.filebtn input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.filebtn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; margin-top: 8px; }
+.thumbs:empty { display: none; }
+.thumb { position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden; border: 1px solid var(--rule); background: var(--polaroid-bg); padding: 4px 4px 18px 4px; box-shadow: 0 1px 3px var(--shadow); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 2px; }
+.thumb-x, .thumb-mk {
+  position: absolute; border: 0; border-radius: 999px; background: var(--paper); color: var(--ink); font-size: 0.7rem; line-height: 1; padding: 4px 6px;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+.thumb-x { top: 6px; right: 6px; }
+.thumb-mk { left: 6px; bottom: 3px; font-family: var(--font-mono); font-size: 0.65rem; }
+.stamp-editor { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; margin-top: 10px; }
+#stampCv { width: 180px; max-width: 100%; height: auto; touch-action: none; cursor: grab; background: var(--paper-line); border-radius: 4px; }
+.stamp-controls { display: flex; flex-direction: column; gap: 8px; flex: 1 1 180px; min-width: 0; }
+.stamp-controls input[type="range"] { width: 100%; accent-color: var(--accent); }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill-btn {
+  display: inline-flex; align-items: center; background: transparent; border: 1px solid var(--rule);
+  border-radius: 999px; padding: 5px 12px; font-size: 0.85rem;
+}
+.pill-btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+.stamp-cur { display: flex; gap: 12px; align-items: center; margin-top: 10px; background: var(--paper-line); padding: 10px; border-radius: 8px; }
+.stamp-cur img { width: 56px; height: auto; max-height: 80px; object-fit: contain; }
+.icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 10px; }
+.icons:empty { display: none; }
+.icon { position: relative; }
+.icon-pick {
+  width: 100%; aspect-ratio: 1; border: 1px solid var(--rule); border-radius: 10px; background: var(--polaroid-bg);
+  padding: 8px; display: grid; place-items: center;
+}
+.icon-pick img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+.icon-pick.none { font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-soft); }
+.icon-pick[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft), 0 0 0 3px var(--accent); }
+.icon-x {
+  position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--rule);
+  background: var(--paper); color: var(--ink); font-size: 0.9rem; line-height: 1; padding: 0; box-shadow: 0 1px 3px var(--shadow);
+}
+
+/* The letter preview card */
+.letter {
+  position: relative;
+  background: var(--polaroid-bg);
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--rule);
+  box-shadow: 0 8px 30px var(--shadow-float);
+  display: flex; flex-direction: column; gap: 16px;
+}
+.lt-line { display: flex; flex-direction: column; gap: 4px; }
+.line-input { width: 100%; border: 0; border-bottom: 1px dashed var(--rule); background: transparent; border-radius: 0; padding: 4px 0 5px; font-size: 0.95rem; }
+.subj-row { display: flex; gap: 10px; align-items: baseline; }
+.subj-row .line-input { flex: 1; min-width: 0; }
+.sample-badge { align-self: flex-start; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--warn); background: var(--warn-soft); padding: 3px 8px; border-radius: 4px; }
+.lt-body { max-height: 540px; overflow: auto; overflow-wrap: anywhere; border-radius: 6px; }
+.lt-body.is-sample { opacity: 0.6; }
+.lt-body img { max-width: 100%; }
+
+/* Post panel: kraft paper, stitched edge, pressable wax seal */
+.po {
+  position: relative; margin-top: 22px; padding: 22px 22px 16px; border-radius: 14px;
+  background: var(--kraft); border: 1px solid var(--kraft-edge);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 24px var(--shadow);
+}
+.po::before { content: ""; position: absolute; inset: 7px; border: 1.5px dashed var(--kraft-edge); border-radius: 9px; pointer-events: none; }
+.po-top { position: relative; display: flex; align-items: center; gap: 18px; }
+.po-text { min-width: 0; flex: 1; }
+.po.is-sealed .po-text { padding-right: 84px; }
+.po-text h3 { font-family: var(--font-display); font-weight: 500; font-size: 1.2rem; line-height: 1.2; margin: 0 0 4px; }
+.po-text p { margin: 0; font-size: 0.85rem; line-height: 1.5; color: var(--ink-soft); }
+.seal {
+  flex: none; position: relative; width: 96px; height: 96px; border: 0; padding: 0; color: var(--seal-ink);
+  font-family: var(--font-display); font-weight: 600; font-size: 1rem; line-height: 1.1; letter-spacing: 0.01em;
+  border-radius: 54% 46% 52% 48% / 48% 54% 46% 52%;
+  background: radial-gradient(circle at 34% 28%, var(--wax1), var(--wax2) 55%, var(--wax3));
+  box-shadow: 0 6px 0 var(--wax-edge), 0 12px 18px var(--shadow-float), inset 0 2px 4px rgba(255, 255, 255, 0.28), inset 0 -3px 6px rgba(0, 0, 0, 0.25);
+}
+.seal::before {
+  content: ""; position: absolute; inset: 11px; border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.28); box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+.seal span { position: relative; display: block; text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.35); }
+.seal:hover { transform: translateY(-1px); }
+.seal:active, .seal.is-sealed {
+  transform: translateY(5px);
+  box-shadow: 0 1px 0 var(--wax-edge), 0 3px 6px var(--shadow-float), inset 0 3px 8px rgba(0, 0, 0, 0.35);
+}
+.seal:disabled { opacity: 0.45; filter: grayscale(0.5); cursor: not-allowed; transform: none; }
+.postmark {
+  position: absolute; right: 12px; top: -10px; width: 96px; color: var(--ink-soft); opacity: 0.85;
+  transform: rotate(-8deg); pointer-events: none;
+}
+.po-send { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 18px; }
+.tab {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 6px; text-decoration: none; color: var(--ink);
+  background: var(--paper); border: 1px solid var(--kraft-edge); box-shadow: 0 2px 0 var(--kraft-edge);
+  font-size: 0.88rem; font-weight: 500; cursor: pointer;
+}
+.tab:hover { transform: translateY(-1px); box-shadow: 0 3px 0 var(--kraft-edge); }
+.tab:active { transform: translateY(2px); box-shadow: 0 0 0 var(--kraft-edge); }
+.tab[aria-disabled="true"] { opacity: 0.45; pointer-events: none; box-shadow: none; }
+.po .hint { margin-top: 10px; }
+.po-more { position: relative; margin-top: 12px; border-top: 1px dashed var(--kraft-edge); padding-top: 10px; }
+.po-more summary { font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); cursor: pointer; padding: 2px 0; }
+.po-more summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.copy-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.btn-ghost { display: inline-block; background: transparent; color: var(--ink); border: 1px solid var(--rule); border-radius: 999px; padding: 6px 14px; font-size: 0.85rem; text-decoration: none; }
+.po .btn-ghost { border-color: var(--kraft-edge); }
+.btn-ghost:hover { background: var(--paper-line); }
+.btn-ghost:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 0 16px;
+  background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px; font-weight: 600; font-size: 0.88rem; cursor: pointer;
+}
+.status { color: var(--ink); min-height: 1.3em; font-weight: 500; margin-top: 12px; }
+
+@media (max-width: 460px) {
+  .po-top { flex-direction: column; align-items: flex-start; }
+  .po.is-sealed .po-text { padding-right: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tpl-body, .btn-ghost, .drawer-toggle, .pill-btn { transition: background-color 0.15s, border-color 0.15s, opacity 0.15s; }
+  .seal, .tab { transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.15s; }
+  .postmark:not([hidden]) { animation: stampIn 0.28s ease-out; }
+}
+@keyframes stampIn { from { opacity: 0; transform: rotate(-8deg) scale(1.5); } to { opacity: 0.85; transform: rotate(-8deg) scale(1); } }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header class="top">
+    <div class="logo-slot" id="logoSlot">
+      <img id="logoImg" src="assets/logo.png" alt="Pigeon Post logo" hidden>
+      <span id="logoPh">Logo</span>
+    </div>
+    <div>
+      <h1>Pigeon Post</h1>
+      <p class="lbl">Letters to yourself.</p>
+    </div>
+    <button type="button" class="theme-btn" id="themeBtn" aria-label="Change colour theme">Theme: Auto</button>
+  </header>
+
+  <main class="grid">
+    <div class="notebook">
+      <span class="lbl">Today's page</span>
+      <input id="title" class="title-input" type="text" placeholder="Title (optional)" maxlength="120" autocomplete="off">
+
+      <div class="meta-row">
+        <div>
+          <label class="lbl" for="date">Date</label>
+          <input id="date" class="date-input" type="date">
+        </div>
+        <div class="grow">
+          <label class="lbl" for="loc">Location</label>
+          <input id="loc" class="box-input" type="text" placeholder="Where are you writing from?" maxlength="80" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="tagfield">
+        <label class="lbl" for="tagAdd">Tags</label>
+        <div class="tags-box">
+          <span class="taglist" id="tagList"></span>
+          <input id="tagAdd" class="tag-add" type="text" placeholder="Type a tag, press Enter" maxlength="24" autocomplete="off">
+        </div>
+      </div>
+
+      <textarea id="text" class="page" aria-label="Your entry" spellcheck="true"></textarea>
+
+      <div class="page-foot">
+        <span class="mono" id="wc">0 words</span>
+        <span>
+          <span class="mono" id="saved"></span>
+          <button type="button" class="linkbtn" id="newEntry">New entry</button>
+        </span>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+        <button type="button" class="drawer-toggle" id="toggleTpl" aria-expanded="false" aria-controls="drawerTpl">
+          <span>Template style (<span id="currentTplName">Typewriter</span>)</span>
+          <span id="tplArrow" aria-hidden="true">↓</span>
+        </button>
+        <div class="drawer-content" id="drawerTpl" hidden>
+          <div class="tpls" id="tpls" role="radiogroup" aria-label="Template"></div>
+          <section id="detailsWrap" hidden style="margin-top:8px;">
+            <h2 id="detailsTitle"></h2>
+            <div class="prompts" id="details"></div>
+          </section>
+        </div>
+
+        <button type="button" class="drawer-toggle" id="togglePhotos" aria-expanded="false" aria-controls="drawerPhotos">
+          <span>Add photos <span id="photoBadge" class="mono" style="color:var(--accent);"></span></span>
+          <span id="photoArrow" aria-hidden="true">↓</span>
+        </button>
+        <div class="drawer-content" id="drawerPhotos" hidden>
+          <div class="photo-bar">
+            <label class="btn-ghost filebtn">Choose photos<input id="photoIn" type="file" accept="image/*" multiple></label>
+            <span class="mono" id="photoNote">Resized to fit an email. Up to 8.</span>
+          </div>
+          <div class="thumbs" id="thumbs"></div>
+        </div>
+
+        <button type="button" class="drawer-toggle" id="toggleStamp" aria-expanded="false" aria-controls="drawerStamp">
+          <span>Postage stamp maker</span>
+          <span id="stampArrow" aria-hidden="true">↓</span>
+        </button>
+        <div class="drawer-content" id="drawerStamp" hidden>
+          <p class="hint">Crop a photo into a postage stamp for the top right of your letter.</p>
+          <div class="photo-bar">
+            <label class="btn-ghost filebtn">Choose photo<input id="stampIn" type="file" accept="image/*"></label>
+            <span class="mono">or tap Stamp on any photo</span>
+          </div>
+          <div class="stamp-editor" id="stampEditor" hidden>
+            <canvas id="stampCv" tabindex="0" aria-label="Stamp preview. Drag or use arrow keys to position."></canvas>
+            <div class="stamp-controls">
+              <div class="seg" role="group" aria-label="Stamp shape">
+                <button type="button" class="pill-btn" id="shPort" aria-pressed="true">Portrait</button>
+                <button type="button" class="pill-btn" id="shLand" aria-pressed="false">Landscape</button>
+              </div>
+              <label class="lbl" for="stampZoom">Zoom</label>
+              <input id="stampZoom" type="range" min="1" max="3" step="0.01" value="1">
+              <p class="mono" style="margin:0">Drag the photo to reposition it.</p>
+              <div><button type="button" class="btn-primary" id="stampUse">Use as stamp</button></div>
+            </div>
+          </div>
+          <div class="stamp-cur" id="stampCur" hidden>
+            <img id="stampCurImg" alt="Your stamp">
+            <div>
+              <span class="mono">Your stamp is in the top right of the letter.</span><br>
+              <button type="button" class="linkbtn" id="stampRemove">Remove stamp</button>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="drawer-toggle" id="toggleIcons" aria-expanded="false" aria-controls="drawerIcons">
+          <span>Sign-off icon <span id="iconBadge" class="mono" style="color:var(--accent);"></span></span>
+          <span id="iconArrow" aria-hidden="true">↓</span>
+        </button>
+        <div class="drawer-content" id="drawerIcons" hidden>
+          <p class="hint">Upload your own small icons, like a set of flowers. Pick one and it goes in the footer of your email, placed to suit the template. Transparent PNGs look best.</p>
+          <div class="photo-bar">
+            <label class="btn-ghost filebtn">Add icons<input id="iconIn" type="file" accept="image/*" multiple></label>
+            <span class="mono">Saved on this device. Up to 12.</span>
+          </div>
+          <div class="icons" id="icons" role="group" aria-label="Sign-off icon"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="post">
+      <section class="letter" aria-label="Your letter">
+        <div class="lt-line">
+          <label class="lbl" for="to">To</label>
+          <input id="to" class="line-input" type="email" inputmode="email" autocomplete="email" placeholder="your-address@example.com">
+        </div>
+        <div class="lt-line">
+          <label class="lbl" for="subject">Subject</label>
+          <div class="subj-row">
+            <input id="subject" class="line-input" type="text" autocomplete="off">
+            <button type="button" class="linkbtn" id="resetSubj" hidden>Auto</button>
+          </div>
+        </div>
+        <span class="sample-badge" id="sampleBadge">Example. Your entry replaces this.</span>
+        <div class="lt-body" id="ltBody" tabindex="0" aria-label="Letter preview"></div>
+      </section>
+
+      <section class="po" id="po" aria-label="Post your letter">
+        <svg class="postmark" id="postmark" viewBox="0 0 64 64" aria-hidden="true" hidden>
+          <defs>
+            <path id="pmTop" d="M 11 32 A 21 21 0 0 1 53 32"/>
+            <path id="pmBot" d="M 7 32 A 25 25 0 0 0 57 32"/>
+          </defs>
+          <circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <circle cx="32" cy="32" r="17" fill="none" stroke="currentColor" stroke-width="1"/>
+          <text font-family="JetBrains Mono, monospace" font-size="6" letter-spacing="1.2" fill="currentColor"><textPath href="#pmTop" startOffset="50%" text-anchor="middle">PIGEON POST</textPath></text>
+          <text font-family="JetBrains Mono, monospace" font-size="5.5" letter-spacing="1.2" fill="currentColor"><textPath href="#pmBot" startOffset="50%" text-anchor="middle">SEALED</textPath></text>
+          <text id="pmDate" x="32" y="33" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" font-weight="500" fill="currentColor">16 OCT</text>
+          <text id="pmYear" x="32" y="41" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="6" fill="currentColor">2026</text>
+        </svg>
+        <div class="po-top">
+          <button type="button" class="seal" id="seal" aria-describedby="poMsg"><span id="sealLbl">Seal<br>&amp; copy</span></button>
+          <div class="po-text">
+            <h3 id="poHead">Seal it, then paste it</h3>
+            <p id="poMsg" role="status" aria-live="polite">Press the seal to copy your letter with its styling.</p>
+          </div>
+        </div>
+        <div class="po-send">
+          <span class="lbl">Paste into</span>
+          <a id="openGmail" class="tab" target="_blank" rel="noopener">Gmail <span aria-hidden="true">↗</span></a>
+          <a id="openMail" class="tab">Mail app <span aria-hidden="true">↗</span></a>
+        </div>
+        <p class="hint" id="sendHint"></p>
+        <details class="po-more">
+          <summary>Other ways to keep it</summary>
+          <div class="copy-row">
+            <button type="button" class="btn-ghost" id="downloadEml">Download .eml</button>
+            <button type="button" class="btn-ghost" id="copySubj">Copy subject</button>
+            <button type="button" class="btn-ghost" id="copyPlain">Copy plain text</button>
+          </div>
+        </details>
+      </section>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  function rep(s, n) { return new Array(Math.max(0, n) + 1).join(s); }
+
+  var HALF = ['0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'];
+  var PIN = '📍';
+
+  /* Each template carries its own email look (th), header layout (v), sign-off placement and optional extra fields. */
+  var TEMPLATES = [
+    { id: 'typewriter', name: 'Typewriter', desc: 'Typed memo on cream paper.', v: 'stack', fields: [],
+      th: { outer: '#e6e0d1', paper: '#f6f2e7', border: '1px solid #cfc7b3', radius: '2px', ink: '#222220', muted: '#6c6759', accent: '#a02c20', line: '#a02c20', dash: 'dashed', soft: '#ebe4d2', pillInk: '#5a2a22', pb: '0', body: "'Courier New',Courier,monospace", ui: "'Courier New',Courier,monospace", head: "'Courier New',Courier,monospace", up: true, size: 14, lh: 1.7, pad: 28, photoFrame: 'border:1px solid #222220;padding:5px;background:#ffffff;', sigAlign: 'center', sigW: 46 } },
+    { id: 'fall', name: 'Fall', desc: 'Rust, gold and woodsmoke.', v: 'stack', fields: [],
+      th: { outer: '#f1dcc0', paper: '#fff8ee', border: '2px solid #e0b27f', radius: '10px', ink: '#4a2c17', muted: '#8a6a4f', accent: '#b5521b', line: '#d89b2b', dash: 'dotted', soft: '#f6d9b5', pillInk: '#8a3d12', pb: '0', body: "Georgia,'Times New Roman',serif", ui: 'Arial,Helvetica,sans-serif', head: "Georgia,'Times New Roman',serif", size: 15, lh: 1.7, pad: 28, photoFrame: 'background:#ffffff;padding:6px;border:1px solid #e0b27f;', sigAlign: 'right', sigW: 56 } },
+    { id: 'spring', name: 'Spring', desc: 'Soft greens and blossom pink.', v: 'stack', fields: [],
+      th: { outer: '#e3f1e6', paper: '#fffefb', border: '2px solid #b9dcc4', radius: '18px', ink: '#2d4636', muted: '#6f8a78', accent: '#3d8a58', line: '#b9dcc4', dash: 'dashed', soft: '#fbdbe5', pillInk: '#a24565', pb: '0', body: "'Trebuchet MS',Verdana,sans-serif", ui: "'Trebuchet MS',Verdana,sans-serif", head: "'Trebuchet MS',Verdana,sans-serif", size: 15, lh: 1.7, pad: 28, photoFrame: 'border:4px solid #ffffff;outline:1px solid #b9dcc4;', sigAlign: 'center', sigW: 60 } },
+    { id: 'fieldnotes', name: 'Field Notes', desc: 'Kraft cover and a boxed header.', v: 'boxed', fields: [],
+      th: { outer: '#b08d57', paper: '#f6f3ea', border: '0', radius: '2px', ink: '#26262a', muted: '#6b685f', accent: '#c4402b', line: '#26262a', dash: 'solid', soft: '#ebe7da', pillInk: '#26262a', pb: '0', body: "'Helvetica Neue',Helvetica,Arial,sans-serif", ui: "'Helvetica Neue',Helvetica,Arial,sans-serif", head: "'Helvetica Neue',Helvetica,Arial,sans-serif", size: 14, lh: 1.65, pad: 24, photoFrame: 'border:1px solid #26262a;', sigAlign: 'left', sigW: 44 } },
+    { id: 'oldletter', name: 'Old Letter', desc: 'Parchment, "Dear me," and a sign-off.', v: 'letter', fields: [],
+      th: { outer: '#d8c7a0', paper: '#f3e6c6', border: '1px solid #b99c63', radius: '2px', ink: '#3a2a1a', muted: '#7b6244', accent: '#7a4b24', line: '#c9ac74', dash: 'solid', soft: '#e8d6ac', pillInk: '#5e3b1c', pb: '0', body: "Georgia,'Times New Roman',serif", ui: "Georgia,'Times New Roman',serif", head: "Georgia,'Times New Roman',serif", size: 16, lh: 1.8, pad: 34, photoFrame: 'background:#fbf4e3;padding:8px 8px 22px;border:1px solid #cdb27a;', sigAlign: 'left', sigW: 48 } },
+    { id: 'postcard', name: 'Postcard', desc: 'A banner, message and address side.', v: 'postcard', fields: [],
+      th: { outer: '#efe9dc', paper: '#fffdf8', border: '1px solid #cfc7b6', radius: '4px', ink: '#2b2a30', muted: '#74706a', accent: '#2e5c9b', line: '#b9b2a2', dash: 'solid', soft: '#dfe8f4', pillInk: '#244a7c', pb: '0', body: "Georgia,'Times New Roman',serif", ui: "'Courier New',Courier,monospace", head: "Georgia,'Times New Roman',serif", size: 14, lh: 1.7, pad: 0, photoFrame: '', sigAlign: 'right', sigW: 44 } },
+    { id: 'food', name: 'Food Diary', desc: 'A menu card with a place sticker.', v: 'menu', titleField: 'place',
+      fields: [
+        { id: 'place', label: 'Place', type: 'text', ph: 'Restaurant or cafe name', sample: 'Corner cafe' },
+        { id: 'frate', label: 'Rating', type: 'select', opts: ['1', '2', '3', '4', '5'], stars: true, sample: '4' }
+      ],
+      th: { outer: '#f7e5d6', paper: '#fffaf3', border: '3px double #d4472b', radius: '4px', ink: '#3d2b24', muted: '#8a6e62', accent: '#d4472b', line: '#e9b9a8', dash: 'dashed', soft: '#fbd9cc', pillInk: '#9b2f18', pb: '0', body: "Georgia,'Times New Roman',serif", ui: 'Arial,Helvetica,sans-serif', head: "Georgia,'Times New Roman',serif", size: 15, lh: 1.7, pad: 28, photoFrame: 'border:6px solid #ffffff;outline:1px solid #e9b9a8;', sigAlign: 'center', sigW: 52 } },
+    { id: 'letterboxd', name: 'Letterboxd', desc: 'A dark film log with stars.', v: 'film', titleField: 'film',
+      fields: [
+        { id: 'film', label: 'Film', type: 'text', ph: 'Film title', sample: 'Film title' },
+        { id: 'year', label: 'Year', type: 'text', ph: '2024', max: 4, sample: '2024' },
+        { id: 'lrate', label: 'Rating', type: 'select', opts: HALF, stars: true, sample: '4' },
+        { id: 'watched', label: 'Watch', type: 'select', opts: ['First watch', 'Rewatch'], sample: 'First watch' },
+        { id: 'with', label: 'Watched with', type: 'text', ph: 'Who was there?', sample: 'Friends' },
+        { id: 'theater', label: 'Watched in theaters', type: 'check', sample: '1' }
+      ],
+      th: { outer: '#0f1317', paper: '#1b222a', border: '0', radius: '6px', ink: '#cfd9e3', muted: '#8795a3', accent: '#3ad06f', line: '#2e3a46', dash: 'solid', soft: 'transparent', pillInk: '#9fb0c0', pb: '1px solid #3a4856', body: "'Helvetica Neue',Helvetica,Arial,sans-serif", ui: 'Arial,Helvetica,sans-serif', head: "Georgia,'Times New Roman',serif", size: 15, lh: 1.7, pad: 24, photoFrame: '', sigAlign: 'left', sigW: 40 } },
+    { id: 'haul', name: 'Bookstore Haul', desc: 'A receipt for your new books.', v: 'receipt', titleField: 'store',
+      fields: [
+        { id: 'store', label: 'Bookstore', type: 'text', ph: 'Bookstore name', sample: 'Your bookstore' },
+        { id: 'books', label: 'Books', type: 'area', ph: 'One book per line: Title, Author', sample: 'First book, Author\nSecond book, Author' }
+      ],
+      th: { outer: '#c7a276', paper: '#fbf6ea', border: '1px dashed #a8946f', radius: '0', ink: '#2b2620', muted: '#7a6e5c', accent: '#8a3b21', line: '#a8946f', dash: 'dashed', soft: '#efe5cf', pillInk: '#5a4a35', pb: '0', body: "'Courier New',Courier,monospace", ui: "'Courier New',Courier,monospace", head: "'Courier New',Courier,monospace", size: 13, lh: 1.65, pad: 26, photoFrame: 'border:1px solid #a8946f;padding:4px;background:#ffffff;', sigAlign: 'center', sigW: 44 } },
+    { id: 'winter', name: 'Winter', desc: 'Cool blues and quiet type.', v: 'stack', fields: [],
+      th: { outer: '#dce8f2', paper: '#fbfdff', border: '1px solid #b9d0e2', radius: '6px', ink: '#1f3552', muted: '#5f7a93', accent: '#3a7ca8', line: '#b9d0e2', dash: 'solid', soft: '#e1eef8', pillInk: '#2b6288', pb: '0', body: "Georgia,'Times New Roman',serif", ui: 'Arial,Helvetica,sans-serif', head: "Georgia,'Times New Roman',serif", size: 15, lh: 1.75, pad: 30, photoFrame: 'border:1px solid #b9d0e2;padding:4px;background:#ffffff;', sigAlign: 'center', sigW: 52 } },
+    { id: 'plain', name: 'Plain', desc: 'Clean and simple.', v: 'stack', fields: [],
+      th: { outer: '#ffffff', paper: '#ffffff', border: '1px solid #e5e5e5', radius: '0', ink: '#222222', muted: '#777777', accent: '#222222', line: '#e0e0e0', dash: 'solid', soft: '#f0f0f0', pillInk: '#333333', pb: '0', body: 'Arial,Helvetica,sans-serif', ui: 'Arial,Helvetica,sans-serif', head: 'Arial,Helvetica,sans-serif', size: 15, lh: 1.65, pad: 24, photoFrame: '', sigAlign: 'left', sigW: 44 } }
+  ];
+  var PH = { typewriter: 'Strike the keys. Say what happened.', fall: 'What did the season give you today?', spring: 'What is new today?', fieldnotes: 'Observe. Note it down.', oldletter: 'Write it the way you would to an old friend.', postcard: 'Wish you were here. Tell yourself why.', food: 'What did it taste like?', letterboxd: 'What did you think of it?', haul: 'What did you bring home, and why those?', winter: 'Something quiet from today.', plain: 'Start anywhere. Write the way you would tell a friend.' };
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  /* ---------- state ---------- */
+  var KEY = 'pigeon-post:v2', ICON_KEY = 'pigeon-post:icons';
+  function defaults() {
+    return { to: '', tpl: 'typewriter', title: '', loc: '', text: '', fields: {}, subject: '', subjectTouched: false, tags: [], stamp: '', stampLand: false, icon: '' };
+  }
+  var S = defaults();
+  var P = [];      /* photos live in memory only: [{url}] */
+  var ICONS = [];  /* sign-off icons, saved on this device: [{id, url}] */
+  (function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var o = JSON.parse(raw);
+        if (o && typeof o === 'object') S = Object.assign(defaults(), o);
+      }
+    } catch (e) { /* storage unavailable */ }
+    try {
+      var ri = localStorage.getItem(ICON_KEY);
+      if (ri) { var a = JSON.parse(ri); if (Array.isArray(a)) ICONS = a.filter(function (i) { return i && i.id && i.url; }); }
+    } catch (e) { /* storage unavailable */ }
+    if (!S.fields || typeof S.fields !== 'object') S.fields = {};
+    if (!Array.isArray(S.tags)) S.tags = [];
+    if (typeof S.stamp !== 'string') S.stamp = '';
+    if (typeof S.icon !== 'string') S.icon = '';
+    if (!TEMPLATES.some(function (t) { return t.id === S.tpl; })) S.tpl = 'typewriter';
+  })();
+
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function todayISO() { var d = new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function parseISO(s) {
+    var p = (s || '').split('-').map(Number);
+    return p.length === 3 && p[0] ? new Date(p[0], p[1] - 1, p[2]) : new Date();
+  }
+  var dateStr = todayISO();
+  function subjDate(d) { return d.getDate() + ' ' + MON[d.getMonth()] + ', ' + d.getFullYear(); }
+  /* The header line used in every template: "16 Oct, 2026. | 📍 Location" */
+  function dateText(L) { return subjDate(L.d) + '.' + (L.loc ? ' | ' + PIN + ' ' + L.loc : ''); }
+
+  function tpl() { return TEMPLATES.filter(function (t) { return t.id === S.tpl; })[0]; }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function words(s) { return (String(s).match(/\S+/g) || []).length; }
+  function clip(s, n) {
+    if (s.length <= n) return s;
+    var cut = s.slice(0, n), i = cut.lastIndexOf(' ');
+    return (i > 20 ? cut.slice(0, i) : cut).replace(/[,;:\s]+$/, '') + '…';
+  }
+  function cleanTag(t) {
+    return String(t).toLowerCase().replace(/^#+/, '').replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24);
+  }
+  function fieldVals() {
+    var o = {};
+    tpl().fields.forEach(function (f) { o[f.id] = (S.fields[f.id] || '').trim(); });
+    return o;
+  }
+  function entryTitle() {
+    if (S.title.trim()) return S.title.trim();
+    var tf = tpl().titleField;
+    return tf ? (S.fields[tf] || '').trim() : '';
+  }
+  function hasContent() {
+    var fv = fieldVals();
+    return !!S.text.trim() || P.length > 0 || Object.keys(fv).some(function (k) { return fv[k]; });
+  }
+  /* Subject: "16 Oct, 2026 | Title", or just the date when there is no title */
+  function autoSubject() {
+    var s = subjDate(parseISO(dateStr)), ti = entryTitle();
+    return ti ? s + ' | ' + clip(ti, 60) : s;
+  }
+  function curIcon() {
+    var f = ICONS.filter(function (i) { return i.id === S.icon; })[0];
+    return f ? f.url : '';
+  }
+
+  function letterData() {
+    return { t: tpl(), d: parseISO(dateStr), title: entryTitle(), loc: S.loc.trim(), tags: S.tags.slice(), main: S.text.trim(), fv: fieldVals(), photos: P.slice(), stamp: S.stamp, stampLand: S.stampLand, sig: curIcon(), to: S.to.trim() };
+  }
+  function sampleData() {
+    var t = tpl(), fv = {};
+    t.fields.forEach(function (f) { fv[f.id] = f.sample || ''; });
+    return {
+      t: t, d: parseISO(dateStr), title: S.title.trim(), loc: S.loc.trim() || 'Your location', tags: S.tags.length ? S.tags.slice() : ['tag'],
+      main: 'Today felt slower than I expected, in a good way. I made tea, opened the window, and wrote this down before I could forget it.\n\nMore of that, please.',
+      fv: fv, photos: [], stamp: S.stamp, stampLand: S.stampLand, sig: curIcon(), to: S.to.trim()
+    };
+  }
+
+  /* ---------- rating helpers ---------- */
+  function starsHtml(v, on, off) {
+    var n = parseFloat(v);
+    if (!(n > 0)) return '';
+    var full = Math.floor(n), half = (n - full) >= 0.5, rest = 5 - full - (half ? 1 : 0);
+    var s = '<span style="color:' + on + ';letter-spacing:2px;">' + rep('★', full) + (half ? '½' : '') + '</span>';
+    if (rest > 0) s += '<span style="color:' + off + ';letter-spacing:2px;">' + rep('★', rest) + '</span>';
+    return s;
+  }
+  function starsPlain(v) {
+    var n = parseFloat(v);
+    if (!(n > 0)) return '';
+    var full = Math.floor(n);
+    return rep('★', full) + ((n - full) >= 0.5 ? '½' : '') + ' (' + n + '/5)';
+  }
+  function bookLines(txt) {
+    return String(txt || '').split(/\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+  }
+
+  /* ---------- plain-text letter (the plain part of the email) ---------- */
+  function plain(L) {
+    var o = [];
+    if (L.title) o.push(L.title);
+    o.push(dateText(L));
+    if (L.tags.length) o.push(L.tags.map(function (t) { return '#' + t; }).join(' '));
+    L.t.fields.forEach(function (f) {
+      var val = L.fv[f.id];
+      if (!val) return;
+      if (f.type === 'check') o.push(f.label);
+      else if (f.type === 'area') {
+        o.push('', f.label + ':');
+        bookLines(val).forEach(function (b, i) { o.push(pad2(i + 1) + '  ' + b); });
+      } else if (f.stars) o.push(f.label + ': ' + starsPlain(val));
+      else o.push(f.label + ': ' + val);
+    });
+    o.push('');
+    if (L.main) o.push(L.main);
+    return o.join('\n');
+  }
+
+  /* ---------- styled email (preview, clipboard and .eml share this markup) ---------- */
+  function para(txt, T) {
+    return txt.split(/\n{2,}/).map(function (p) {
+      return '<p style="margin:0 0 12px;color:' + T.ink + ';">' + esc(p).replace(/\n/g, '<br>') + '</p>';
+    }).join('');
+  }
+  function h2(txt, T, extra) {
+    return '<div style="font-family:' + T.head + ';font-size:' + (T.up ? '18' : '22') + 'px;line-height:1.3;color:' + T.ink + ';margin:0 0 6px;' + (T.up ? 'text-transform:uppercase;letter-spacing:.06em;' : '') + (extra || '') + '">' + esc(txt) + '</div>';
+  }
+  function dateLine(L, T, extra) {
+    return '<div style="font-family:' + T.ui + ';font-size:13px;color:' + T.muted + ';margin:0 0 8px;' + (extra || '') + '">' + esc(dateText(L)) + '</div>';
+  }
+  function pill(t, T) {
+    return '<span style="display:inline-block;padding:2px 10px;margin:0 6px 4px 0;border-radius:999px;background:' + T.soft + ';color:' + T.pillInk + ';border:' + T.pb + ';font-family:' + T.ui + ';font-size:12px;line-height:1.5;">#' + esc(t) + '</span>';
+  }
+  function badge(txt, T) {
+    return '<span style="display:inline-block;padding:2px 10px;margin:0 6px 4px 0;border-radius:999px;border:1px solid ' + T.line + ';color:' + T.pillInk + ';font-family:' + T.ui + ';font-size:12px;line-height:1.5;">' + esc(txt) + '</span>';
+  }
+  function pills(L, T, center) { return L.tags.length ? '<div' + (center ? ' style="text-align:center;"' : '') + '>' + L.tags.map(function (t) { return pill(t, T); }).join('') + '</div>' : ''; }
+  function tagText(L) { return L.tags.map(function (t) { return '#' + t; }).join(' '); }
+  function rule(T) { return '<div style="border-top:1px ' + T.dash + ' ' + T.line + ';margin:16px 0;font-size:0;line-height:0;height:0;"></div>'; }
+  function stampTd(L) {
+    if (!L.stamp) return '';
+    var w = L.stampLand ? 96 : 76;
+    return '<td align="right" valign="top" style="width:' + (w + 14) + 'px;padding-left:14px;vertical-align:top;"><img src="' + L.stamp + '" alt="Stamp" width="' + w + '" style="display:block;width:' + w + 'px;height:auto;border:0;"></td>';
+  }
+  function tbl(left, L) {
+    return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;"><tr><td valign="top" style="vertical-align:top;">' + left + '</td>' + stampTd(L) + '</tr></table>';
+  }
+  function photosHtml(L, T, skipFirst) {
+    return L.photos.slice(skipFirst ? 1 : 0).map(function (p) {
+      return '<div style="margin:14px 0;' + T.photoFrame + '"><img src="' + p.url + '" alt="Photo" style="display:block;width:100%;height:auto;border:0;"></div>';
+    }).join('');
+  }
+  function sigImg(L, T) {
+    return '<img src="' + L.sig + '" alt="" width="' + T.sigW + '" style="display:inline-block;width:' + T.sigW + 'px;height:auto;border:0;">';
+  }
+  function footer(L, T) {
+    var s = L.sig ? '<div style="text-align:' + T.sigAlign + ';margin-top:20px;">' + sigImg(L, T) + '</div>' : '';
+    if (L.t.id === 'typewriter') return s + '<div style="text-align:center;margin-top:' + (L.sig ? 8 : 20) + 'px;color:' + T.muted + ';">— 30 —</div>';
+    if (L.t.v === 'receipt') return rule(T) + (L.sig ? '<div style="text-align:center;margin:0 0 8px;">' + sigImg(L, T) + '</div>' : '') + '<div style="text-align:center;color:' + T.muted + ';font-size:12px;letter-spacing:.1em;">THANK YOU · COME AGAIN</div>';
+    if (L.t.v === 'letter') return '';
+    return s;
+  }
+
+  function header(L, T) {
+    var v = L.t.v, ti = L.title, left = '', fv = L.fv;
+    if (v === 'stack') {
+      left = (ti ? h2(ti, T) : '') + dateLine(L, T) + pills(L, T);
+      return tbl(left, L) + rule(T);
+    }
+    if (v === 'letter') {
+      left = (ti ? h2(ti, T) : '') + dateLine(L, T, 'font-style:italic;') + pills(L, T);
+      return tbl(left, L);
+    }
+    if (v === 'boxed') {
+      var cs = 'vertical-align:middle;border:1px solid ' + T.ink + ';padding:8px 10px;font-family:' + T.ui + ';font-size:13px;';
+      var row = '<td valign="middle" style="' + cs + 'color:' + T.ink + ';">' + esc(dateText(L)) + '</td>' +
+        (L.tags.length ? '<td valign="middle" style="' + cs + '">' + L.tags.map(function (t) { return pill(t, T); }).join('') + '</td>' : '');
+      return ((ti || L.stamp) ? tbl(ti ? h2(ti, T) : '', L) : '') +
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin-top:8px;"><tr>' + row + '</tr></table><div style="height:16px;line-height:16px;font-size:0;">&nbsp;</div>';
+    }
+    if (v === 'menu') {
+      var sticker = fv.place ? '<div style="margin:2px 0 10px;"><span style="display:inline-block;background:#ffffff;color:#262626;font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:15px;letter-spacing:.03em;text-transform:uppercase;padding:7px 16px 7px 12px;border-radius:999px;border:1px solid #ececec;box-shadow:0 2px 8px rgba(0,0,0,.18);">' + PIN + ' ' + esc(fv.place) + '</span></div>' : '';
+      left = '<div style="text-align:center;">' + (ti && ti !== fv.place ? h2(ti, T, 'text-align:center;') : '') + sticker +
+        (fv.frate ? '<div style="font-size:18px;margin:4px 0;">' + starsHtml(fv.frate, T.accent, '#ecd2c7') + '</div>' : '') +
+        dateLine(L, T, 'text-align:center;') + pills(L, T, true) + '</div>';
+      return tbl(left, L) + rule(T);
+    }
+    if (v === 'film') {
+      var yr = fv.year ? ' <span style="font-size:16px;color:' + T.muted + ';">' + esc(fv.year) + '</span>' : '';
+      var bs = '';
+      if (fv.watched === 'Rewatch') bs += badge('↻ Rewatch', T);
+      if (fv.theater) bs += badge('🍿 Watched in theaters', T);
+      if (fv.with) bs += badge('With ' + fv.with, T);
+      left = '<div style="font-family:' + T.head + ';font-size:26px;line-height:1.25;color:#ffffff;margin:0 0 4px;">' + esc(fv.film || ti || 'Untitled film') + yr + '</div>' +
+        (fv.lrate ? '<div style="font-size:20px;margin:2px 0 6px;">' + starsHtml(fv.lrate, T.accent, '#3a4856') + '</div>' : '') +
+        dateLine(L, T) + (bs ? '<div>' + bs + '</div>' : '') + pills(L, T) +
+        (fv.film && ti && ti !== fv.film ? '<div style="color:#ffffff;margin-top:6px;font-family:' + T.head + ';font-size:17px;">' + esc(ti) + '</div>' : '');
+      return tbl(left, L) + rule(T);
+    }
+    if (v === 'receipt') {
+      left = '<div style="font-size:18px;font-weight:bold;text-transform:uppercase;letter-spacing:.06em;margin:0 0 2px;">' + esc(fv.store || ti || 'Bookshop') + '</div>' +
+        (ti && fv.store && ti !== fv.store ? '<div style="color:' + T.muted + ';">' + esc(ti) + '</div>' : '') +
+        dateLine(L, T) + pills(L, T);
+      return tbl(left, L) + rule(T);
+    }
+    return '';
+  }
+  function receiptItems(L, T) {
+    var items = bookLines(L.fv.books), h = '';
+    if (items.length) {
+      h += items.map(function (b, i) {
+        return '<div style="margin:2px 0;"><span style="color:' + T.muted + ';">' + pad2(i + 1) + '</span>&nbsp;&nbsp;' + esc(b) + '</div>';
+      }).join('');
+      h += rule(T) + '<div style="font-weight:bold;">ITEMS: ' + items.length + '</div>';
+    }
+    if (L.main) h += rule(T);
+    return h;
+  }
+  function postcard(L, T) {
+    var h = '<div style="max-width:560px;margin:0 auto;background:' + T.paper + ';border:' + T.border + ';border-radius:' + T.radius + ';overflow:hidden;color:' + T.ink + ';font-family:' + T.body + ';font-size:14px;line-height:1.7;">';
+    h += '<div style="background:' + T.accent + ';color:#ffffff;padding:12px 18px;font-family:' + T.head + ';font-size:17px;letter-spacing:.02em;">' + esc(dateText(L)) + '</div>';
+    if (L.photos[0]) h += '<img src="' + L.photos[0].url + '" alt="Photo" style="display:block;width:100%;height:auto;border:0;">';
+    h += '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;"><tr>';
+    h += '<td valign="top" style="vertical-align:top;width:60%;padding:16px;border-right:1px solid ' + T.line + ';">' + (L.title ? h2(L.title, T) : '') + (L.main ? para(L.main, T) : '') + '</td>';
+    h += '<td valign="top" style="vertical-align:top;padding:12px 14px 16px;font-family:' + T.ui + ';font-size:12px;">';
+    if (L.stamp) { var w = L.stampLand ? 96 : 76; h += '<div align="right" style="text-align:right;margin-bottom:10px;"><img src="' + L.stamp + '" alt="Stamp" width="' + w + '" style="width:' + w + 'px;height:auto;border:0;"></div>'; }
+    var addr = function (txt) { return '<div style="border-bottom:1px solid ' + T.line + ';padding:5px 0;min-height:18px;color:' + T.ink + ';">' + (txt ? esc(txt) : '&nbsp;') + '</div>'; };
+    h += addr('To: ' + (L.to || 'myself')) + addr(tagText(L)) + addr('');
+    h += '</td></tr></table>';
+    h += L.photos.slice(1).map(function (p) { return '<img src="' + p.url + '" alt="Photo" style="display:block;width:100%;height:auto;border:0;margin-top:2px;">'; }).join('');
+    if (L.sig) h += '<div style="text-align:right;padding:8px 16px 14px;">' + sigImg(L, T) + '</div>';
+    return h + '</div>';
+  }
+  function renderEmail(L) {
+    var T = L.t.th, v = L.t.v;
+    var open = '<div style="background:' + T.outer + ';padding:18px 12px;">';
+    if (v === 'postcard') return open + postcard(L, T) + '</div>';
+    var h = open + '<div style="max-width:560px;margin:0 auto;background:' + T.paper + ';border:' + T.border + ';border-radius:' + T.radius + ';padding:' + T.pad + 'px;color:' + T.ink + ';font-family:' + T.body + ';font-size:' + T.size + 'px;line-height:' + T.lh + ';">';
+    var skipFirst = false;
+    if (v === 'film' && L.photos[0]) {
+      h += '<img src="' + L.photos[0].url + '" alt="Photo" style="display:block;width:100%;height:auto;border:0;border-radius:4px;margin:0 0 16px;">';
+      skipFirst = true;
+    }
+    h += header(L, T);
+    if (v === 'letter') h += '<div style="margin:20px 0 10px;font-style:italic;">Dear me,</div>';
+    if (v === 'receipt') h += receiptItems(L, T);
+    if (L.main) h += para(L.main, T);
+    h += photosHtml(L, T, skipFirst);
+    if (v === 'letter') {
+      h += '<div style="margin-top:20px;font-style:italic;">Yours, always,</div>' + (L.sig
+        ? '<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:6px;border-collapse:collapse;"><tr><td valign="middle" style="vertical-align:middle;padding-right:10px;">' + sigImg(L, T) + '</td><td valign="middle" style="vertical-align:middle;font-style:italic;">— me</td></tr></table>'
+        : '<div style="margin-top:2px;">— me</div>');
+    }
+    h += footer(L, T);
+    return h + '</div></div>';
+  }
+
+  /* ---------- .eml export: a real HTML email with photos, stamp and icon embedded ---------- */
+  function b64(str) { return btoa(unescape(encodeURIComponent(str))); }
+  function wrap76(s) { return (s.match(/.{1,76}/g) || ['']).join('\r\n'); }
+  function encWord(s) { return /^[\x20-\x7e]*$/.test(s) ? s : '=?UTF-8?B?' + b64(s) + '?='; }
+  function buildEml(L, subject) {
+    var imgs = [], idx = {};
+    var html = renderEmail(L).replace(/src="data:(image\/[a-z0-9.+-]+);base64,([^"]+)"/g, function (m, type, data) {
+      var key = type + ':' + data.length + ':' + data.slice(0, 48) + data.slice(-48);
+      if (!(key in idx)) { idx[key] = imgs.length; imgs.push({ type: type, data: data, cid: 'img' + imgs.length + '@journal' }); }
+      return 'src="cid:' + imgs[idx[key]].cid + '"';
+    });
+    var full = '<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;">' + html + '</body></html>';
+    var stamp = Date.now(), B1 = '----journal-rel-' + stamp, B2 = '----journal-alt-' + stamp;
+    var to = validEmail(S.to) ? S.to.trim() : '';
+    var out = [];
+    if (to) out.push('To: ' + to);
+    out.push('Subject: ' + encWord(subject), 'X-Unsent: 1', 'MIME-Version: 1.0',
+      'Content-Type: multipart/related; type="multipart/alternative"; boundary="' + B1 + '"', '',
+      '--' + B1, 'Content-Type: multipart/alternative; boundary="' + B2 + '"', '',
+      '--' + B2, 'Content-Type: text/plain; charset=utf-8', 'Content-Transfer-Encoding: base64', '', wrap76(b64(plain(L))), '',
+      '--' + B2, 'Content-Type: text/html; charset=utf-8', 'Content-Transfer-Encoding: base64', '', wrap76(b64(full)), '',
+      '--' + B2 + '--', '');
+    imgs.forEach(function (im) {
+      out.push('--' + B1, 'Content-Type: ' + im.type, 'Content-Transfer-Encoding: base64', 'Content-ID: <' + im.cid + '>', 'Content-Disposition: inline', '', wrap76(im.data), '');
+    });
+    out.push('--' + B1 + '--', '');
+    return out.join('\r\n');
+  }
+  function download(name, text, type) {
+    var blob = new Blob([text], { type: type }), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+
+  /* ---------- render ---------- */
+  function autoGrow(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+  function validEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s.trim()); }
+
+  function renderTags() {
+    var box = $('tagList');
+    box.textContent = '';
+    S.tags.forEach(function (t) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.setAttribute('aria-label', 'Remove tag ' + t);
+      b.innerHTML = '<span>#' + esc(t) + '</span><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 1l8 8M9 1l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+      b.addEventListener('click', function () {
+        S.tags = S.tags.filter(function (x) { return x !== t; });
+        update();
+        $('tagAdd').focus();
+      });
+      box.appendChild(b);
+    });
+  }
+  function renderPreview() {
+    var filled = hasContent();
+    $('ltBody').innerHTML = renderEmail(filled ? letterData() : sampleData());
+    $('ltBody').classList.toggle('is-sample', !filled);
+    $('sampleBadge').hidden = filled;
+  }
+  function setLink(a, href) {
+    if (href) { a.setAttribute('href', href); a.removeAttribute('aria-disabled'); a.removeAttribute('tabindex'); }
+    else { a.removeAttribute('href'); a.setAttribute('aria-disabled', 'true'); a.setAttribute('tabindex', '-1'); }
+  }
+  function renderActions() {
+    var filled = hasContent(), okAddr = validEmail(S.to);
+    var subj = encodeURIComponent($('subject').value || ''), to = okAddr ? S.to.trim() : '';
+    setLink($('openMail'), filled ? 'mailto:' + to + '?subject=' + subj : '');
+    setLink($('openGmail'), filled ? 'https://mail.google.com/mail/?view=cm&fs=1' + (okAddr ? '&to=' + encodeURIComponent(to) : '') + '&su=' + subj : '');
+    ['seal', 'downloadEml', 'copySubj', 'copyPlain'].forEach(function (id) { $(id).disabled = !filled; });
+    $('sendHint').textContent = !filled ? 'Write something first.' :
+      !okAddr ? 'Add your address at the top of the letter and the To line fills in for you.' :
+      'Paste with Ctrl+V (Cmd+V on a Mac). The To line and subject are already filled in.';
+  }
+  function renderMeta() {
+    var n = words(S.text);
+    $('wc').textContent = n + (n === 1 ? ' word' : ' words');
+    $('text').placeholder = PH[S.tpl] || PH.plain;
+    $('currentTplName').textContent = tpl().name;
+    $('photoBadge').textContent = P.length ? '(' + P.length + ')' : '';
+    $('iconBadge').textContent = curIcon() ? '· on' : '';
+    $('photoNote').textContent = P.length ? P.length + ' of 8 added. Resized to fit an email.' : 'Resized to fit an email. Up to 8.';
+    $('stampCur').hidden = !S.stamp;
+    if (S.stamp) $('stampCurImg').src = S.stamp;
+  }
+  function renderDerived() {
+    if (!S.subjectTouched) $('subject').value = autoSubject();
+    $('resetSubj').hidden = !S.subjectTouched;
+    renderTags();
+    renderMeta();
+    renderPreview();
+    renderActions();
+  }
+  var saveT;
+  function save() {
+    clearTimeout(saveT);
+    saveT = setTimeout(function () {
+      try {
+        S.subject = $('subject').value;
+        localStorage.setItem(KEY, JSON.stringify(S));
+        $('saved').textContent = 'Draft kept on this device (photos are not)';
+      } catch (e) { $('saved').textContent = ''; }
+    }, 400);
+  }
+  var sealed = false;
+  function update() { if (sealed) setSealed(false); renderDerived(); save(); }
+
+  /* ---------- the seal ---------- */
+  var MSG_IDLE = 'Press the seal to copy your letter with its styling.';
+  function setSealed(on, msg) {
+    sealed = on;
+    $('seal').classList.toggle('is-sealed', on);
+    $('po').classList.toggle('is-sealed', on);
+    $('postmark').hidden = !on;
+    $('sealLbl').innerHTML = on ? 'Sealed' : 'Seal<br>&amp; copy';
+    $('poHead').textContent = on ? 'Copied. Now paste it' : 'Seal it, then paste it';
+    $('poMsg').textContent = msg || (on ? 'Open a blank email below and paste into the body.' : MSG_IDLE);
+  }
+
+  /* ---------- build controls ---------- */
+  function buildTemplates() {
+    var box = $('tpls');
+    TEMPLATES.forEach(function (t) {
+      var l = document.createElement('label');
+      l.className = 'tpl';
+      l.innerHTML = '<input type="radio" name="tpl" value="' + t.id + '"' + (S.tpl === t.id ? ' checked' : '') + '><span class="tpl-body"><span class="sw"><i style="background:' + t.th.outer + '"></i><i style="background:' + t.th.paper + '"></i><i style="background:' + t.th.accent + '"></i></span><b>' + esc(t.name) + '</b><span class="d">' + esc(t.desc) + '</span></span>';
+      l.querySelector('input').addEventListener('change', function () {
+        S.tpl = t.id;
+        renderDetails();
+        update();
+      });
+      box.appendChild(l);
+    });
+  }
+  function renderDetails() {
+    var t = tpl(), box = $('details');
+    box.textContent = '';
+    $('detailsWrap').hidden = !t.fields.length;
+    $('detailsTitle').textContent = 'Details for ' + t.name;
+    t.fields.forEach(function (f) {
+      var wrap = document.createElement('div');
+      wrap.className = 'pfield';
+      var c;
+      if (f.type === 'check') {
+        var lb = document.createElement('label');
+        lb.className = 'check';
+        c = document.createElement('input');
+        c.type = 'checkbox';
+        c.id = 'f-' + f.id;
+        c.checked = S.fields[f.id] === '1';
+        c.addEventListener('change', function () { S.fields[f.id] = c.checked ? '1' : ''; update(); });
+        lb.appendChild(c);
+        lb.appendChild(document.createTextNode(f.label));
+        wrap.appendChild(lb);
+        box.appendChild(wrap);
+        return;
+      }
+      var lab = document.createElement('label');
+      lab.className = 'lbl';
+      lab.htmlFor = 'f-' + f.id;
+      lab.textContent = f.label;
+      if (f.type === 'select') {
+        c = document.createElement('select');
+        c.className = 'box-input';
+        var o0 = document.createElement('option');
+        o0.value = '';
+        o0.textContent = '—';
+        c.appendChild(o0);
+        f.opts.forEach(function (ov) {
+          var o = document.createElement('option');
+          o.value = ov;
+          o.textContent = ov + (f.stars ? ' ★' : '');
+          c.appendChild(o);
+        });
+        c.value = S.fields[f.id] || '';
+      } else if (f.type === 'area') {
+        c = document.createElement('textarea');
+        c.className = 'small';
+        c.rows = 3;
+        c.placeholder = f.ph || '';
+        c.value = S.fields[f.id] || '';
+      } else {
+        c = document.createElement('input');
+        c.type = 'text';
+        c.className = 'box-input';
+        c.placeholder = f.ph || '';
+        if (f.max) c.maxLength = f.max;
+        c.value = S.fields[f.id] || '';
+      }
+      c.id = 'f-' + f.id;
+      var h = function () { S.fields[f.id] = c.value; if (f.type === 'area') autoGrow(c); update(); };
+      c.addEventListener('input', h);
+      c.addEventListener('change', h);
+      wrap.appendChild(lab);
+      wrap.appendChild(c);
+      box.appendChild(wrap);
+      if (f.type === 'area') autoGrow(c);
+    });
+  }
+
+  /* ---------- drawers ---------- */
+  var DRAWERS = { toggleTpl: ['drawerTpl', 'tplArrow'], togglePhotos: ['drawerPhotos', 'photoArrow'], toggleStamp: ['drawerStamp', 'stampArrow'], toggleIcons: ['drawerIcons', 'iconArrow'] };
+  function setDrawer(btnId, open) {
+    var map = DRAWERS[btnId];
+    $(map[0]).hidden = !open;
+    $(btnId).setAttribute('aria-expanded', open ? 'true' : 'false');
+    $(map[1]).textContent = open ? '↑' : '↓';
+    if (open) Array.prototype.forEach.call($(map[0]).querySelectorAll('.small'), autoGrow);
+  }
+  Object.keys(DRAWERS).forEach(function (id) {
+    $(id).addEventListener('click', function () { setDrawer(id, $(id).getAttribute('aria-expanded') !== 'true'); });
+  });
+
+  /* ---------- clipboard + status ---------- */
+  var statusT;
+  function say(msg) {
+    var s = $('status');
+    s.textContent = msg;
+    clearTimeout(statusT);
+    statusT = setTimeout(function () { s.textContent = ''; }, 12000);
+  }
+  function copyText(txt) {
+    return Promise.resolve().then(function () { return navigator.clipboard.writeText(txt); }).then(function () { return true; }, function () {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = txt;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand('copy');
+        ta.remove();
+        return ok;
+      } catch (e) { return false; }
+    });
+  }
+  /* Rich copy. First choice is a synchronous copy of the rendered letter, which browsers accept
+     straight from a click and which pastes with formatting. Then the async clipboard API, then plain text. */
+  function copyBySelection(h) {
+    var box = document.createElement('div');
+    box.setAttribute('aria-hidden', 'true');
+    box.style.cssText = 'position:fixed;left:-99999px;top:0;width:620px;background:transparent;';
+    box.innerHTML = h;
+    document.body.appendChild(box);
+    var ok = false;
+    try {
+      var range = document.createRange();
+      range.selectNodeContents(box);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      ok = !!document.execCommand('copy');
+      sel.removeAllRanges();
+    } catch (e) { ok = false; }
+    box.remove();
+    return ok;
+  }
+  function copyRich(h, p) {
+    if (copyBySelection(h)) return Promise.resolve('rich');
+    return Promise.resolve().then(function () {
+      if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+        return navigator.clipboard.write([new ClipboardItem({
+          'text/html': new Blob([h], { type: 'text/html' }),
+          'text/plain': new Blob([p], { type: 'text/plain' })
+        })]).then(function () { return 'rich'; });
+      }
+      return Promise.reject(new Error('no clipboard api'));
+    }).catch(function () {
+      return copyText(p).then(function (ok) { return ok ? 'plain' : 'fail'; });
+    });
+  }
+
+  /* ---------- images ---------- */
+  function loadImage(file) {
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); res(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('read')); };
+      img.src = url;
+    });
+  }
+  function compress(img) {
+    var w0 = img.naturalWidth, h0 = img.naturalHeight, out = '';
+    var tries = [[1280, 0.8], [1000, 0.7], [800, 0.6]];
+    for (var i = 0; i < tries.length; i++) {
+      var s = Math.min(1, tries[i][0] / Math.max(w0, h0));
+      var c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(w0 * s));
+      c.height = Math.max(1, Math.round(h0 * s));
+      var x = c.getContext('2d');
+      x.fillStyle = '#ffffff';
+      x.fillRect(0, 0, c.width, c.height);
+      x.drawImage(img, 0, 0, c.width, c.height);
+      out = c.toDataURL('image/jpeg', tries[i][1]);
+      if (out.length < 380000) break;
+    }
+    return out;
+  }
+  /* Icons keep their transparency, so they stay PNG and are scaled down to a small size. */
+  function toIcon(img) {
+    var w0 = img.naturalWidth || 160, h0 = img.naturalHeight || 160;
+    var s = Math.min(1, 160 / Math.max(w0, h0));
+    var c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w0 * s));
+    c.height = Math.max(1, Math.round(h0 * s));
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/png');
+  }
+  function renderThumbs() {
+    var box = $('thumbs');
+    box.textContent = '';
+    P.forEach(function (p, i) {
+      var d = document.createElement('div');
+      d.className = 'thumb';
+      var im = document.createElement('img');
+      im.src = p.url;
+      im.alt = 'Photo ' + (i + 1);
+      var x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'thumb-x';
+      x.setAttribute('aria-label', 'Remove photo ' + (i + 1));
+      x.textContent = '×';
+      x.addEventListener('click', function () { P.splice(P.indexOf(p), 1); renderThumbs(); update(); });
+      var m = document.createElement('button');
+      m.type = 'button';
+      m.className = 'thumb-mk';
+      m.setAttribute('aria-label', 'Make a stamp from photo ' + (i + 1));
+      m.textContent = 'Stamp';
+      m.addEventListener('click', function () { setDrawer('toggleStamp', true); stampFromUrl(p.url); });
+      d.appendChild(im);
+      d.appendChild(x);
+      d.appendChild(m);
+      box.appendChild(d);
+    });
+  }
+  function addPhotos(files) {
+    var list = Array.prototype.slice.call(files);
+    var room = 8 - P.length;
+    if (room <= 0) { say('You can add up to 8 photos.'); return; }
+    var note = '';
+    if (list.length > room) { list = list.slice(0, room); note = ' Only the first ' + room + ' fit. The limit is 8.'; }
+    say('Resizing…');
+    var added = 0, failed = 0, chain = Promise.resolve();
+    list.forEach(function (f) {
+      chain = chain.then(function () {
+        return loadImage(f).then(function (img) { P.push({ url: compress(img) }); added++; }).catch(function () { failed++; });
+      });
+    });
+    chain.then(function () {
+      renderThumbs();
+      update();
+      say((added ? added + (added === 1 ? ' photo' : ' photos') + ' added and resized.' : '') + (failed ? ' ' + failed + ' could not be read. Try JPEG or PNG.' : '') + note);
+    });
+  }
+
+  /* ---------- sign-off icons ---------- */
+  function saveIcons() {
+    try { localStorage.setItem(ICON_KEY, JSON.stringify(ICONS)); return true; } catch (e) { return false; }
+  }
+  function renderIcons() {
+    var box = $('icons');
+    box.textContent = '';
+    if (!ICONS.length) return;
+    var none = document.createElement('div');
+    none.className = 'icon';
+    var nb = document.createElement('button');
+    nb.type = 'button';
+    nb.className = 'icon-pick none';
+    nb.textContent = 'None';
+    nb.setAttribute('aria-pressed', curIcon() ? 'false' : 'true');
+    nb.addEventListener('click', function () { S.icon = ''; renderIcons(); update(); });
+    none.appendChild(nb);
+    box.appendChild(none);
+    ICONS.forEach(function (ic, i) {
+      var d = document.createElement('div');
+      d.className = 'icon';
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'icon-pick';
+      b.setAttribute('aria-label', 'Sign-off icon ' + (i + 1));
+      b.setAttribute('aria-pressed', S.icon === ic.id ? 'true' : 'false');
+      var im = document.createElement('img');
+      im.src = ic.url;
+      im.alt = '';
+      b.appendChild(im);
+      b.addEventListener('click', function () { S.icon = ic.id; renderIcons(); update(); });
+      var x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'icon-x';
+      x.setAttribute('aria-label', 'Delete icon ' + (i + 1));
+      x.textContent = '×';
+      x.addEventListener('click', function () {
+        ICONS = ICONS.filter(function (z) { return z.id !== ic.id; });
+        if (S.icon === ic.id) S.icon = '';
+        saveIcons();
+        renderIcons();
+        update();
+      });
+      d.appendChild(b);
+      d.appendChild(x);
+      box.appendChild(d);
+    });
+  }
+  function addIcons(files) {
+    var list = Array.prototype.slice.call(files);
+    var room = 12 - ICONS.length;
+    if (room <= 0) { say('You can keep up to 12 icons. Delete one to add another.'); return; }
+    var note = '';
+    if (list.length > room) { list = list.slice(0, room); note = ' Only the first ' + room + ' fit.'; }
+    var added = 0, failed = 0, chain = Promise.resolve();
+    list.forEach(function (f) {
+      chain = chain.then(function () {
+        return loadImage(f).then(function (img) {
+          var id = 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+          ICONS.push({ id: id, url: toIcon(img) });
+          if (!S.icon) S.icon = id;
+          added++;
+        }).catch(function () { failed++; });
+      });
+    });
+    chain.then(function () {
+      var kept = saveIcons();
+      renderIcons();
+      update();
+      say((added ? added + (added === 1 ? ' icon added.' : ' icons added.') : '') + (failed ? ' ' + failed + ' could not be read.' : '') + (kept ? '' : ' They could not be saved on this device, so they last until you close this page.') + note);
+    });
+  }
+
+  /* ---------- stamp maker ---------- */
+  var stampSrc = null, view = { zoom: 1, ox: 0, oy: 0 }, land = false;
+  function toCanvas(img, max) {
+    var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+    var s = Math.min(1, max / Math.max(w, h));
+    var c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * s));
+    c.height = Math.max(1, Math.round(h * s));
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    return c;
+  }
+  function drawStamp() {
+    var cv = $('stampCv');
+    if (!stampSrc) return;
+    var W = land ? 250 : 200, H = land ? 200 : 250, m = 22;
+    cv.width = W;
+    cv.height = H;
+    var x = cv.getContext('2d');
+    x.clearRect(0, 0, W, H);
+    x.fillStyle = '#fdfaf3';
+    x.fillRect(0, 0, W, H);
+    var ww = W - 2 * m, wh = H - 2 * m;
+    var s = Math.max(ww / stampSrc.width, wh / stampSrc.height) * view.zoom;
+    var dw = stampSrc.width * s, dh = stampSrc.height * s;
+    var mx = (dw - ww) / 2, my = (dh - wh) / 2;
+    view.ox = Math.max(-mx, Math.min(mx, view.ox));
+    view.oy = Math.max(-my, Math.min(my, view.oy));
+    x.save();
+    x.beginPath();
+    x.rect(m, m, ww, wh);
+    x.clip();
+    x.drawImage(stampSrc, m + ww / 2 + view.ox - dw / 2, m + wh / 2 + view.oy - dh / 2, dw, dh);
+    x.restore();
+    x.strokeStyle = 'rgba(0,0,0,0.2)';
+    x.lineWidth = 1;
+    x.strokeRect(m + 0.5, m + 0.5, ww - 1, wh - 1);
+    x.globalCompositeOperation = 'destination-out';
+    var r = 6, step = 17;
+    function holes(len, fixed, horiz) {
+      var n = Math.max(1, Math.round(len / step)), gap = len / n;
+      for (var i = 0; i <= n; i++) {
+        x.beginPath();
+        if (horiz) x.arc(i * gap, fixed, r, 0, Math.PI * 2); else x.arc(fixed, i * gap, r, 0, Math.PI * 2);
+        x.fill();
+      }
+    }
+    holes(W, 0, true); holes(W, H, true); holes(H, 0, false); holes(H, W, false);
+    x.globalCompositeOperation = 'source-over';
+  }
+  function setStampSource(img) {
+    stampSrc = toCanvas(img, 1100);
+    view = { zoom: 1, ox: 0, oy: 0 };
+    $('stampZoom').value = '1';
+    $('stampEditor').hidden = false;
+    setDrawer('toggleStamp', true);
+    drawStamp();
+  }
+  function stampFromUrl(url) {
+    var im = new Image();
+    im.onload = function () { setStampSource(im); };
+    im.src = url;
+  }
+  function setShape(l) {
+    land = l;
+    $('shPort').setAttribute('aria-pressed', l ? 'false' : 'true');
+    $('shLand').setAttribute('aria-pressed', l ? 'true' : 'false');
+    view.ox = 0;
+    view.oy = 0;
+    drawStamp();
+  }
+
+  /* ---------- wire up ---------- */
+  buildTemplates();
+  renderDetails();
+  renderIcons();
+  $('title').value = S.title;
+  $('text').value = S.text;
+  $('loc').value = S.loc;
+  $('date').value = dateStr;
+  $('to').value = S.to;
+  if (S.subjectTouched) $('subject').value = S.subject;
+  (function postmarkDate() {
+    var d = new Date();
+    $('pmDate').textContent = d.getDate() + ' ' + MON[d.getMonth()].toUpperCase();
+    $('pmYear').textContent = String(d.getFullYear());
+  })();
+
+  $('title').addEventListener('input', function (e) { S.title = e.target.value; update(); });
+  $('loc').addEventListener('input', function (e) { S.loc = e.target.value; update(); });
+  $('text').addEventListener('input', function (e) { S.text = e.target.value; autoGrow(e.target); update(); });
+  $('date').addEventListener('input', function (e) { if (e.target.value) { dateStr = e.target.value; update(); } });
+  $('to').addEventListener('input', function (e) { S.to = e.target.value; update(); });
+  $('subject').addEventListener('input', function () { S.subjectTouched = true; $('resetSubj').hidden = false; if (sealed) setSealed(false); renderActions(); save(); });
+  $('resetSubj').addEventListener('click', function () { S.subjectTouched = false; update(); });
+
+  function commitTag() {
+    var inp = $('tagAdd'), t = cleanTag(inp.value);
+    inp.value = '';
+    if (!t || S.tags.indexOf(t) >= 0 || S.tags.length >= 8) return;
+    S.tags.push(t);
+    update();
+  }
+  $('tagAdd').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); commitTag(); }
+    else if (e.key === 'Backspace' && !e.target.value && S.tags.length) { S.tags.pop(); update(); }
+  });
+  $('tagAdd').addEventListener('blur', commitTag);
+
+  var clearArmed = false, clearT;
+  $('newEntry').addEventListener('click', function () {
+    var b = $('newEntry');
+    if (!clearArmed) {
+      clearArmed = true;
+      b.textContent = 'Tap again to clear this entry';
+      clearT = setTimeout(function () { clearArmed = false; b.textContent = 'New entry'; }, 4000);
+      return;
+    }
+    clearTimeout(clearT);
+    clearArmed = false;
+    b.textContent = 'New entry';
+    S.title = ''; S.text = ''; S.loc = ''; S.fields = {}; S.subject = ''; S.subjectTouched = false; S.tags = [];
+    P = [];
+    dateStr = todayISO();
+    $('title').value = ''; $('text').value = ''; $('loc').value = ''; $('date').value = dateStr;
+    renderDetails();
+    renderThumbs();
+    autoGrow($('text'));
+    update();
+    say('Cleared. Your stamp and sign-off icon are kept. A fresh page is ready.');
+  });
+
+  $('seal').addEventListener('click', function () {
+    var L = letterData();
+    copyRich(renderEmail(L), plain(L)).then(function (r) {
+      if (r === 'rich') setSealed(true, 'Your letter is on the clipboard' + (L.photos.length || L.stamp || L.sig ? ', photos and all' : '') + '. Open a blank email below and paste into the body.');
+      else if (r === 'plain') { setSealed(false, 'Your browser only allowed plain text, so the styling was left out. Open "Other ways to keep it" and use Download .eml.'); }
+      else setSealed(false, 'Your browser blocked the copy. Open "Other ways to keep it" and use Download .eml instead.');
+    });
+  });
+  $('downloadEml').addEventListener('click', function () {
+    var L = letterData();
+    try {
+      download(subjDate(L.d).replace(/,/g, '') + '.eml', buildEml(L, $('subject').value), 'message/rfc822');
+      say('Downloaded. Open the .eml file and your mail app shows the styled letter with photos and stamp inside. Whether it opens as a draft or a message depends on the app.');
+    } catch (e) { say('Could not build the .eml file.'); }
+  });
+  $('copySubj').addEventListener('click', function () {
+    copyText($('subject').value).then(function (ok) { say(ok ? 'Subject copied.' : 'Could not copy. Select the subject and copy it by hand.'); });
+  });
+  $('copyPlain').addEventListener('click', function () {
+    copyText(plain(letterData())).then(function (ok) { say(ok ? 'Plain text copied.' : 'Could not copy. Select the text in the preview and copy it by hand.'); });
+  });
+
+  $('photoIn').addEventListener('change', function (e) { if (e.target.files && e.target.files.length) addPhotos(e.target.files); e.target.value = ''; });
+  $('iconIn').addEventListener('change', function (e) { if (e.target.files && e.target.files.length) addIcons(e.target.files); e.target.value = ''; });
+  $('stampIn').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    loadImage(f).then(setStampSource).catch(function () { say('That photo could not be read. Try JPEG or PNG.'); });
+  });
+  $('shPort').addEventListener('click', function () { setShape(false); });
+  $('shLand').addEventListener('click', function () { setShape(true); });
+  $('stampZoom').addEventListener('input', function (e) { view.zoom = parseFloat(e.target.value) || 1; drawStamp(); });
+  $('stampUse').addEventListener('click', function () {
+    if (!stampSrc) return;
+    S.stamp = $('stampCv').toDataURL('image/png');
+    S.stampLand = land;
+    update();
+    say('Stamp added to the top right of your letter.');
+  });
+  $('stampRemove').addEventListener('click', function () { S.stamp = ''; S.stampLand = false; update(); say('Stamp removed.'); });
+
+  var cv = $('stampCv'), drag = null;
+  cv.addEventListener('pointerdown', function (e) {
+    drag = { x: e.clientX, y: e.clientY };
+    try { cv.setPointerCapture(e.pointerId); } catch (err) { /* optional */ }
+    cv.style.cursor = 'grabbing';
+  });
+  cv.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var k = cv.width / cv.getBoundingClientRect().width;
+    view.ox += (e.clientX - drag.x) * k;
+    view.oy += (e.clientY - drag.y) * k;
+    drag = { x: e.clientX, y: e.clientY };
+    drawStamp();
+  });
+  ['pointerup', 'pointercancel'].forEach(function (n) { cv.addEventListener(n, function () { drag = null; cv.style.cursor = 'grab'; }); });
+  cv.addEventListener('keydown', function (e) {
+    var d = { ArrowLeft: [-8, 0], ArrowRight: [8, 0], ArrowUp: [0, -8], ArrowDown: [0, 8] }[e.key];
+    if (!d) return;
+    e.preventDefault();
+    view.ox += d[0];
+    view.oy += d[1];
+    drawStamp();
+  });
+
+  (function theme() {
+  var KEY = 'pigeon-post:theme', modes = ['auto', 'light', 'dark'], btn = $('themeBtn'), i = 0;
+  try { i = Math.max(0, modes.indexOf(localStorage.getItem(KEY))); } catch (e) { /* storage unavailable */ }
+  function apply() {
+    var m = modes[i], r = document.documentElement;
+    if (m === 'auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', m);
+    btn.textContent = 'Theme: ' + m.charAt(0).toUpperCase() + m.slice(1);
+  }
+  btn.addEventListener('click', function () {
+    i = (i + 1) % modes.length;
+    try { localStorage.setItem(KEY, modes[i]); } catch (e) { /* ignore */ }
+    apply();
+  });
+  apply();
+})();
+
+  /* Logo slot: shows a dashed placeholder until assets/logo.png exists */
+  (function logo() {
+    var img = $('logoImg');
+    function ok() { img.hidden = false; $('logoPh').hidden = true; $('logoSlot').classList.add('has-img'); }
+    img.addEventListener('load', ok);
+    if (img.complete && img.naturalWidth > 0) ok();
+  })();
+
+  window.addEventListener('resize', function () {
+    autoGrow($('text'));
+    Array.prototype.forEach.call(document.querySelectorAll('.small'), autoGrow);
+  });
+  renderDerived();
+  autoGrow($('text'));
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { autoGrow($('text')); });
+  }
+})();
+</script>
+</body>
+</html>
